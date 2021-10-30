@@ -1,5 +1,5 @@
 [package]
-name = "config-swap"
+name = "config-loader"
 version = "0.1.0"
 authors = ["Zacchary Dempsey-Plante <zacc@ztdp.ca>"]
 edition = "2021"

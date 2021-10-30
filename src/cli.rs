@@ -5,7 +5,7 @@ use clap::{App, Arg, ArgMatches};
 
 /// Defines the CLI arguments and parses user input.
 pub fn parse_cli_arguments() -> ArgMatches {
-	App::new("Config Swap")
+	App::new("Config Loader")
 		.version(env!("CARGO_PKG_VERSION"))
 		.author(env!("CARGO_PKG_AUTHORS"))
 		.about(env!("CARGO_PKG_DESCRIPTION"))
