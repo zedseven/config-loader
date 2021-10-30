@@ -14,9 +14,9 @@ pub fn parse_cli_arguments() -> ArgMatches {
 			 directory)",
 		))
 		.arg(
-			Arg::new("fuzzy_search")
+			Arg::new("fuzzy")
 				.short('f')
-				.long("fuzzy_search")
+				.long("fuzzy")
 				.about("Allow fuzzy name searching (find names that start with the search)"),
 		)
 		.get_matches()

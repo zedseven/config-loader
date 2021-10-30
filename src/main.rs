@@ -48,7 +48,7 @@ fn main() -> Result<()> {
 		.map(PathBuf::from)
 		.or_else(get_default_master_file)
 		.ok_or_else(|| Error::msg("unable to get a value for the master config file"))?;
-	let fuzzy_search = matches.is_present("fuzzy_search");
+	let fuzzy_search = matches.is_present("fuzzy");
 
 	println!("Using master config file: \"{}\"", master_file.display());
 
