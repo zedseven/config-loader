@@ -1,4 +1,5 @@
 //! A tool for quickly switching between different file configurations.
+
 // Linting rules
 #![warn(
 	clippy::complexity,
@@ -40,7 +41,7 @@ use crate::{app::loadout_loop, cli::parse_cli_arguments};
 // Constants
 const DEFAULT_MASTER_FILE: &str = "config-master.toml";
 
-// Entry Point
+/// Entry Point.
 fn main() -> Result<()> {
 	let matches = parse_cli_arguments();
 	let master_file = matches
@@ -55,6 +56,7 @@ fn main() -> Result<()> {
 	loadout_loop(master_file.as_path(), fuzzy_search)
 }
 
+/// Fetches the path for the default master file.
 fn get_default_master_file() -> Option<PathBuf> {
 	home_dir().map(|dir| dir.join(DEFAULT_MASTER_FILE))
 }

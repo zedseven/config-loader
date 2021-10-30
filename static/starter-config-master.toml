@@ -1,0 +1,23 @@
+# Config Loader - https://github.com/zedseven/config-loader
+
+# Here's where you define the file targets. These are the files you
+# have to switch out whenever you want to change to a different configuration.
+# Please use absolute file paths.
+[targets]
+target_name = "C:\\Some\\File\\Path.ext"
+another_target_name = "C:\\Some\\Other\\File\\Path.ext"
+
+# Here's where each loadout is defined. Include as many files for each loadout
+# as you need.
+# Each loadout is completely separate from the others. Each one should be a
+# complete set of all the files necessary to work.
+[[loadouts]]
+name = "Some Loadout Name A"
+[loadouts.files]
+target_name = "C:\\Some\\File\\For\\Loadout\\A.ext"
+
+[[loadouts]]
+name = "Some Loadout Name B"
+[loadouts.files]
+target_name = "C:\\Some\\File\\For\\Loadout\\B.ext"
+another_target_name = "C:\\Some\\Other\\File\\For\\Loadout\\B.ext"
