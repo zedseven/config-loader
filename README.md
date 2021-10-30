@@ -1,5 +1,6 @@
-# config-swap
-A tool for quickly switching between different file configurations.
+# config-loader
+A tool for quickly switching between different file configurations, using
+symbolic links.
 
 ## Project License
 This project is licensed under either of
@@ -13,5 +14,5 @@ at your option.
 
 ### Contribution
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in *config-swap* by you, as defined in the Apache-2.0 license,
+for inclusion in *config-loader* by you, as defined in the Apache-2.0 license,
 shall be dual licensed as above, without any additional terms or conditions.
