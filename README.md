@@ -50,7 +50,7 @@ On Windows machines,
 to make symbolic links. If you get a `A required privilege is not held by the client.`
 error, that's why.
 
-If you don't trust the program to give it administrator privileges, the source
+If you don't trust the program to give it Administrator privileges, the source
 code is available, and you can build it from source.
 
 This program should work on Windows and Unix (Linux, MacOS) systems without a
