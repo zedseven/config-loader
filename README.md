@@ -1,4 +1,8 @@
 # config-loader
+[![License: MIT/Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
+[![# Issues](https://img.shields.io/github/issues/zedseven/config-loader?logo=github)](https://github.com/zedseven/config-loader/issues)
+[![Release](https://img.shields.io/github/v/release/zedseven/config-loader?color=orange&logo=azure-artifacts)](https://github.com/zedseven/config-loader/releases/latest)
+
 A tool for quickly switching between different file configurations, using
 symbolic links.
 
@@ -6,11 +10,11 @@ symbolic links.
 To use it, download the latest release for your platform from the
 [Releases tab](https://github.com/zedseven/config-loader/releases).
 
-Simply run the program, and upon first launching it will ask if you want
+Simply run the program, and upon first launching, it will ask if you want
 to create a starter config file.
 
-Once it's created, open it and edit it to your liking. The following is an
-example config:
+Once the config's created, open it and edit it to your liking. The following is an
+example:
 
 ```toml
 # Config Loader - https://github.com/zedseven/config-loader
@@ -19,22 +23,21 @@ example config:
 # have to switch out whenever you want to change to a different configuration.
 # Please use absolute file paths.
 [targets]
-cool_picture = "F:\\Main Windows Folders\\Downloads\\CoolPicture.png"
+cool_picture = "C:\\Users\\Zacc\\Desktop\\CoolPicture.png"
 
 # Here's where each loadout is defined. Include as many files for each loadout
 # as you need.
 # Each loadout is completely separate from the others. Each one should be a
 # complete set of all the files necessary to work.
 [[loadouts]]
-name = "AngeryBird"
+name = "Bird"
 [loadouts.files]
-cool_picture = "F:\\Pictures\\Pictures2\\AngeryBird.png"
+cool_picture = "C:\\Users\\Zacc\\Downloads\\Farfetch'd.png"
 
 [[loadouts]]
 name = "Cheese"
 [loadouts.files]
-cool_picture = "F:\\Pictures\\Pictures2\\Cheese.png"
-
+cool_picture = "C:\\Users\\Zacc\\Pictures\\Cheese.png"
 ```
 
 In this (fairly silly) example, the configuration simply swaps out the same
@@ -47,7 +50,10 @@ to go.
 ### Note
 On Windows machines,
 [Administrator privileges are required](https://security.stackexchange.com/a/10198)
-to make symbolic links. If you get a `A required privilege is not held by the client.`
+to make symbolic links. If you get an
+```
+A required privilege is not held by the client.
+```
 error, that's why.
 
 If you don't trust the program to give it Administrator privileges, the source

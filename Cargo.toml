@@ -4,6 +4,8 @@ version = "1.0.0"
 authors = ["Zacchary Dempsey-Plante <zacc@ztdp.ca>"]
 edition = "2021"
 license = "MIT OR APACHE-2.0"
+homepage = "https://github.com/zedseven/config-loader"
+repository = "https://github.com/zedseven/config-loader"
 description = "A tool for quickly switching between different file configurations, using symbolic links."
 
 [profile.release]
