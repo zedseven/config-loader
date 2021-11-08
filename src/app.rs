@@ -20,6 +20,9 @@ use std::{
 use anyhow::{Context, Error, Result};
 use serde::Deserialize;
 use toml::from_str as from_toml_str;
+use yansi::Paint;
+
+use super::{HEADER_STYLE, INPUT_STYLE, MESSAGE_STYLE, RESULT_STYLE, VALUE_STYLE};
 
 // Constants
 const STARTER_CONFIG_CONTENTS: &str = include_str!("../static/starter-config-master.toml");
@@ -43,7 +46,8 @@ struct Loadout {
 
 /// The main loop of the application. On each loop it reads the config, provides
 /// the user with options, then awaits the user's decision and acts upon it.
-pub fn loadout_loop(master_file: &Path, fuzzy_search: bool) -> Result<()> {
+pub fn loadout_loop(master_file: &Path) -> Result<()> {
+	let mut previous_selection = None;
 	let mut input_buffer = String::new();
 	let stdin = stdin();
 	loop {
@@ -53,8 +57,12 @@ pub fn loadout_loop(master_file: &Path, fuzzy_search: bool) -> Result<()> {
 			Ok(contents) => contents,
 			Err(error) => {
 				println!(
-					"Unable to read the master config file. Would you like a starter one to be \
-					 created? (y/n)"
+					"{} {}",
+					MESSAGE_STYLE.paint(
+						"Unable to read the master config file. Would you like a starter one to \
+						 be created?"
+					),
+					INPUT_STYLE.paint("(y/n)")
 				);
 
 				input_buffer.clear();
@@ -74,9 +82,12 @@ pub fn loadout_loop(master_file: &Path, fuzzy_search: bool) -> Result<()> {
 						},
 					)?;
 					println!(
-						"A starter config file has been created at \"{}\". You will have to edit \
-						 it to add your loadouts before you can use this tool.",
-						master_file.display()
+						"{}",
+						MESSAGE_STYLE.paint(format!(
+							"A starter config file has been created at \"{}\". You will have to \
+							 edit it to add your loadouts before you can use this tool.",
+							VALUE_STYLE.paint(master_file.display())
+						))
 					);
 					continue;
 				}
@@ -99,26 +110,39 @@ pub fn loadout_loop(master_file: &Path, fuzzy_search: bool) -> Result<()> {
 		let number_width = master_config.loadouts.len().log10() as usize + 1;
 
 		// Give the user their options
-		println!("Actions:");
-		println!("\t{:>width$}. Refresh config", "r", width = number_width);
-		println!(
-			"\t{:>width$}. Exit",
-			if number_width >= 3 { "q/x" } else { "q" },
-			width = number_width
-		);
-		println!(
-			"Loadouts: (type the index number or the {})",
-			if fuzzy_search {
-				"start of the name"
-			} else {
-				"full name"
-			}
-		);
+		if previous_selection.is_none() {
+			println!("{}", HEADER_STYLE.paint("Actions:"));
+			println!(
+				"\t{:>width$}. Refresh config",
+				INPUT_STYLE.paint("R"),
+				width = number_width
+			);
+			println!(
+				"\t{:>width$}. Exit",
+				INPUT_STYLE.paint(if number_width >= 3 { "Q/X" } else { "Q" }),
+				width = number_width
+			);
+			println!(
+				"{} (type the index number or the start of the name)",
+				HEADER_STYLE.paint("Loadouts:")
+			);
+		} else {
+			println!("{}", HEADER_STYLE.paint("Loadouts:"));
+		}
 		for (index, loadout) in master_config.loadouts.iter().enumerate() {
+			let matches_previous_selection = if let Some(previous) = &previous_selection {
+				loadout.name.eq(previous)
+			} else {
+				false
+			};
 			println!(
 				"\t{:>width$}. {}",
-				index,
-				loadout.name,
+				INPUT_STYLE.paint(index),
+				if matches_previous_selection {
+					Paint::new(&loadout.name).bold()
+				} else {
+					Paint::new(&loadout.name)
+				},
 				width = number_width
 			);
 		}
@@ -138,6 +162,7 @@ pub fn loadout_loop(master_file: &Path, fuzzy_search: bool) -> Result<()> {
 
 		match user_input.parse::<usize>() {
 			Ok(i) => {
+				previous_selection = Some(master_config.loadouts[i].name.clone());
 				load_loadout(&master_config.targets, &master_config.loadouts[i])?;
 			}
 			Err(_) => match user_input {
@@ -147,17 +172,13 @@ pub fn loadout_loop(master_file: &Path, fuzzy_search: bool) -> Result<()> {
 					let mut found_loadout = None;
 					for loadout in &master_config.loadouts {
 						let loadout_name_prepared = loadout.name.to_lowercase();
-						if fuzzy_search {
-							if loadout_name_prepared.starts_with(input) {
-								found_loadout = Some(loadout);
-								break;
-							}
-						} else if loadout_name_prepared.eq(input) {
+						if loadout_name_prepared.starts_with(input) {
 							found_loadout = Some(loadout);
 							break;
 						}
 					}
 					if let Some(loadout) = found_loadout {
+						previous_selection = Some(loadout.name.clone());
 						load_loadout(&master_config.targets, loadout)?;
 						continue;
 					}
@@ -220,7 +241,7 @@ fn load_loadout(targets: &HashMap<FileTarget, String>, loadout: &Loadout) -> Res
 		}
 	}
 
-	println!("Loaded loadout {}.", loadout.name);
+	println!("{} {}", RESULT_STYLE.paint("Loaded:"), &loadout.name);
 
 	Ok(())
 }

@@ -31,15 +31,25 @@ mod app;
 mod cli;
 
 // Uses
-use std::path::PathBuf;
+use std::{env::var, path::PathBuf};
 
 use anyhow::{Error, Result};
 use home::home_dir;
+use lazy_static::lazy_static;
+use yansi::{Color, Paint, Style};
 
 use crate::{app::loadout_loop, cli::parse_cli_arguments};
 
 // Constants
 const DEFAULT_MASTER_FILE: &str = "config-master.toml";
+const MASTER_CONFIG_VAR: &str = "CONFIG_LOADER_CONFIG";
+lazy_static! {
+	static ref MESSAGE_STYLE: Style = Style::new(Color::Cyan).wrap();
+	static ref HEADER_STYLE: Style = Style::new(Color::Yellow).bold();
+	static ref RESULT_STYLE: Style = Style::new(Color::Green).bold();
+	static ref INPUT_STYLE: Style = Style::default().italic().dimmed();
+	static ref VALUE_STYLE: Style = Style::default().underline();
+}
 
 /// Entry Point.
 fn main() -> Result<()> {
@@ -47,13 +57,22 @@ fn main() -> Result<()> {
 	let master_file = matches
 		.value_of("master")
 		.map(PathBuf::from)
+		.or_else(|| var(MASTER_CONFIG_VAR).ok().map(PathBuf::from))
 		.or_else(get_default_master_file)
 		.ok_or_else(|| Error::msg("unable to get a value for the master config file"))?;
-	let fuzzy_search = matches.is_present("fuzzy");
+	let colour = matches.value_of("colour").expect("clap has betrayed us");
 
-	println!("Using master config file: \"{}\"", master_file.display());
+	if colour == "never" || (colour == "auto" && cfg!(windows) && !Paint::enable_windows_ascii()) {
+		Paint::disable();
+	}
 
-	loadout_loop(master_file.as_path(), fuzzy_search)
+	println!(
+		"{} \"{}\"",
+		RESULT_STYLE.paint("Using master config file:"),
+		VALUE_STYLE.paint(master_file.display())
+	);
+
+	loadout_loop(master_file.as_path())
 }
 
 /// Fetches the path for the default master file.
