@@ -113,9 +113,8 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 		if previous_selection.is_none() {
 			println!("{}", HEADER_STYLE.paint("Actions:"));
 			println!(
-				"\t{:>width$}. Refresh config",
-				INPUT_STYLE.paint("R"),
-				width = number_width
+				"\t{} Refresh config",
+				INPUT_STYLE.paint(format!("{:>width$}.", "R", width = number_width))
 			);
 			println!(
 				"\t{} Exit",
@@ -139,14 +138,13 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 				false
 			};
 			println!(
-				"\t{:>width$}. {}",
-				INPUT_STYLE.paint(index),
+				"\t{} {}",
+				INPUT_STYLE.paint(format!("{:>width$}.", index, width = number_width)),
 				if matches_previous_selection {
 					Paint::new(&loadout.name).bold()
 				} else {
 					Paint::new(&loadout.name)
-				},
-				width = number_width
+				}
 			);
 		}
 
