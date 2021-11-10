@@ -62,7 +62,7 @@ fn main() -> Result<()> {
 		.ok_or_else(|| Error::msg("unable to get a value for the master config file"))?;
 	let colour = matches.value_of("colour").expect("clap has betrayed us");
 
-	if colour == "never" || (colour == "auto" && cfg!(windows) && !Paint::enable_windows_ascii()) {
+	if colour == "never" || (colour == "auto" && !Paint::enable_windows_ascii()) {
 		Paint::disable();
 	}
 

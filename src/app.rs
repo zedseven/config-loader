@@ -107,7 +107,7 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 			.with_context(|| "unable to deserialize the master config file")?;
 
 		// Calculate the width to pad entries to so they remain lined up
-		let number_width = master_config.loadouts.len().log10() as usize + 1;
+		let number_width = (master_config.loadouts.len() - 1).log10() as usize + 1;
 
 		// Give the user their options
 		if previous_selection.is_none() {
@@ -118,9 +118,12 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 				width = number_width
 			);
 			println!(
-				"\t{:>width$}. Exit",
-				INPUT_STYLE.paint(if number_width >= 3 { "Q/X" } else { "Q" }),
-				width = number_width
+				"\t{} Exit",
+				INPUT_STYLE.paint(format!(
+					"{:>width$}.",
+					if number_width >= 3 { "Q/X" } else { "Q" },
+					width = number_width
+				))
 			);
 			println!(
 				"{} (type the index number or the start of the name)",
