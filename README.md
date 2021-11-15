@@ -1,8 +1,8 @@
 # config-loader
 [![License: MIT/Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
-[![# Issues](https://img.shields.io/github/issues/zedseven/config-loader?logo=github)](https://github.com/zedseven/config-loader/issues)
-[![Crates.io](https://img.shields.io/crates/v/config-loader?logo=rust)](https://crates.io/crates/config-loader)
-[![Crate Downloads](https://img.shields.io/crates/d/config-loader?logo=azure-artifacts)](https://crates.io/crates/config-loader)
+[![# Issues](https://img.shields.io/github/issues/zedseven/config-loader.svg?logo=github)](https://github.com/zedseven/config-loader/issues)
+[![Crates.io](https://img.shields.io/crates/v/config-loader.svg?logo=rust)](https://crates.io/crates/config-loader)
+[![Crate Downloads](https://img.shields.io/crates/d/config-loader.svg?logo=azure-artifacts)](https://crates.io/crates/config-loader)
 
 A tool for quickly switching between different file configurations, using
 symbolic links. This tool aims to make it much more ergonomic to work with
