@@ -21,7 +21,7 @@ pub fn parse_cli_arguments() -> ArgMatches {
 				.long("master")
 				.takes_value(true)
 				.value_name("PATH")
-				.about(
+				.long_help(
 					format!(
 						"The location of the master config file to use (if not present, it uses \
 						 the value of the environment variable \"{}\", and if that's not present \
@@ -43,7 +43,7 @@ pub fn parse_cli_arguments() -> ArgMatches {
 					"auto" | "always" | "never" => Ok(()),
 					_ => Err(Error::msg("must be auto, always, or never")),
 				})
-				.about("Colouring: auto, always, never"),
+				.help("Colouring: auto, always, never"),
 		)
 		.get_matches()
 }
