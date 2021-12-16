@@ -68,7 +68,10 @@ fn main() -> Result<()> {
 
 	println!(
 		"{} \"{}\"",
-		RESULT_STYLE.paint("Using loadouts config file:"),
+		RESULT_STYLE.paint(format!(
+			"Config Loader v{}, using loadouts config file:",
+			env!("CARGO_PKG_VERSION")
+		)),
 		VALUE_STYLE.paint(config_file.display())
 	);
 
