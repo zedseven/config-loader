@@ -24,6 +24,7 @@ use toml::from_str as from_toml_str;
 use yansi::Paint;
 
 use super::{HEADER_STYLE, INPUT_STYLE, MESSAGE_STYLE, RESULT_STYLE, VALUE_STYLE};
+use crate::ERROR_STYLE;
 
 // Constants
 const STARTER_CONFIG_CONTENTS: &str = include_str!("../static/starter-loadouts-config.toml");
@@ -177,7 +178,10 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 					previous_selection = Some(loadouts_config.loadouts[i].name.clone());
 					load_loadout(&loadouts_config, loadouts_config.loadouts[i].name.as_str())?;
 				} else {
-					println!("Unrecognized command. Please try again.");
+					println!(
+						"{}",
+						ERROR_STYLE.paint("Unrecognized command. Please try again.")
+					);
 				}
 			}
 			Err(_) => match user_input {
@@ -198,7 +202,10 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 						continue;
 					}
 
-					println!("Unrecognized command. Please try again.");
+					println!(
+						"{}",
+						ERROR_STYLE.paint("Unrecognized command. Please try again.")
+					);
 					continue;
 				}
 			},

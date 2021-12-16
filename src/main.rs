@@ -47,6 +47,7 @@ lazy_static! {
 	static ref MESSAGE_STYLE: Style = Style::new(Color::Cyan).wrap();
 	static ref HEADER_STYLE: Style = Style::new(Color::Yellow).bold();
 	static ref RESULT_STYLE: Style = Style::new(Color::Green).bold();
+	static ref ERROR_STYLE: Style = Style::new(Color::Red).bold();
 	static ref INPUT_STYLE: Style = Style::default().italic().dimmed();
 	static ref VALUE_STYLE: Style = Style::default().underline();
 }
