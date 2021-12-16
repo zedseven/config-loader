@@ -1,6 +1,6 @@
 [package]
 name = "config-loader"
-version = "2.2.0"
+version = "2.2.1"
 authors = ["Zacchary Dempsey-Plante <zacc@ztdp.ca>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"

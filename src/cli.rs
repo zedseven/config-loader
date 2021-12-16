@@ -40,9 +40,9 @@ pub fn parse_cli_arguments() -> ArgMatches {
 				.takes_value(true)
 				.value_name("WHEN")
 				.default_value("auto")
-				.validator(|v| match v {
+				.validator(|v| match v.to_lowercase().as_str() {
 					"auto" | "always" | "never" => Ok(()),
-					_ => Err(Error::msg("must be auto, always, or never")),
+					_ => Err(Error::msg("must be `auto`, `always`, or `never`")),
 				})
 				.help("Colouring: auto, always, never"),
 		)

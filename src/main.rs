@@ -60,9 +60,12 @@ fn main() -> Result<()> {
 		.or_else(|| var(LOADOUTS_CONFIG_PATH_VAR).ok().map(PathBuf::from))
 		.or_else(get_default_config_path)
 		.ok_or_else(|| Error::msg("unable to get a value for the loadouts config file"))?;
-	let colour = matches.value_of("colour").expect("clap has betrayed us");
+	let colour = matches
+		.value_of("colour")
+		.expect("clap has betrayed us")
+		.to_lowercase();
 
-	if colour == "never" || (colour == "auto" && !Paint::enable_windows_ascii()) {
+	if colour.as_str() == "never" || (colour.as_str() == "auto" && !Paint::enable_windows_ascii()) {
 		Paint::disable();
 	}
 
