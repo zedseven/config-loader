@@ -120,7 +120,13 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 				"\t{} Exit",
 				INPUT_STYLE.paint(format!(
 					"{:>width$}.",
-					if number_width >= 3 { "Q/X" } else { "Q" },
+					if number_width >= 5 {
+						"E/Q/X"
+					} else if number_width >= 3 {
+						"E/Q"
+					} else {
+						"E"
+					},
 					width = number_width
 				))
 			);
@@ -168,7 +174,7 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 			}
 			Err(_) => match user_input {
 				"r" => continue,
-				"q" | "x" => break,
+				"e" | "q" | "x" => break,
 				input => {
 					let mut found_loadout = None;
 					for loadout in &loadouts_config.loadouts {
