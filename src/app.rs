@@ -9,6 +9,7 @@ use std::{
 	collections::HashMap,
 	fs::{
 		read_to_string as read_file_to_string,
+		remove_dir,
 		remove_file,
 		symlink_metadata,
 		write as write_string_to_file,
@@ -169,8 +170,12 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 
 		match user_input.parse::<usize>() {
 			Ok(i) => {
-				previous_selection = Some(loadouts_config.loadouts[i].name.clone());
-				load_loadout(&loadouts_config.targets, &loadouts_config.loadouts[i])?;
+				if i < loadouts_config.loadouts.len() {
+					previous_selection = Some(loadouts_config.loadouts[i].name.clone());
+					load_loadout(&loadouts_config.targets, &loadouts_config.loadouts[i])?;
+				} else {
+					println!("Unrecognized command. Please try again.");
+				}
 			}
 			Err(_) => match user_input {
 				"r" => continue,
@@ -187,11 +192,9 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 					if let Some(loadout) = found_loadout {
 						previous_selection = Some(loadout.name.clone());
 						load_loadout(&loadouts_config.targets, loadout)?;
-						continue;
 					}
 
 					println!("Unrecognized command. Please try again.");
-					continue;
 				}
 			},
 		}
@@ -220,9 +223,25 @@ fn load_loadout(targets: &HashMap<FileTarget, String>, loadout: &Loadout) -> Res
 		if let Ok(symlink_info) = symlink_metadata(target) {
 			let file_type = symlink_info.file_type();
 			if file_type.is_symlink() {
-				remove_file(target).with_context(|| {
-					Error::msg(format!("unable to remove the file \"{}\"", target))
-				})?;
+				// Windows directory symlinks must be removed as directories
+				#[cfg(windows)]
+				{
+					remove_file(target)
+						.or_else(|_| remove_dir(target))
+						.with_context(|| {
+							format!(
+								"unable to remove the symlink \"{}\" as both a file and a \
+								 directory",
+								target
+							)
+						})?;
+				}
+				#[cfg(not(windows))]
+				{
+					remove_file(target).with_context(|| {
+						Error::msg(format!("unable to remove the symlink \"{}\"", target))
+					})?;
+				}
 			} else {
 				return Err(Error::msg(format!(
 					"target path \"{}\" exists already and is not a symbolic link",
