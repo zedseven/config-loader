@@ -4,8 +4,8 @@
 # have to switch out whenever you want to change to a different configuration.
 # Please use absolute file paths.
 [targets]
-target_name = "C:\\Some\\File\\Path.ext"
-another_target_name = "C:\\Some\\Other\\File\\Path.ext"
+target_name = "/some/file/path.ext"
+another_target_name = "/some/other/file/path.ext"
 
 # Here's where each loadout is defined. Include as many files for each loadout
 # as you need.
@@ -14,10 +14,10 @@ another_target_name = "C:\\Some\\Other\\File\\Path.ext"
 [[loadouts]]
 name = "Some Loadout Name A"
 [loadouts.files]
-target_name = "C:\\Some\\File\\For\\Loadout\\A.ext"
+target_name = "/some/file/for/loadout/a.ext"
 
 [[loadouts]]
 name = "Some Loadout Name B"
 [loadouts.files]
-target_name = "C:\\Some\\File\\For\\Loadout\\B.ext"
-another_target_name = "C:\\Some\\Other\\File\\For\\Loadout\\B.ext"
+target_name = "/some/file/for/loadout/b.ext"
+another_target_name = "/some/other/file/for/loadout/b.ext"

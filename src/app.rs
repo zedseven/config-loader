@@ -27,7 +27,11 @@ use super::{HEADER_STYLE, INPUT_STYLE, MESSAGE_STYLE, RESULT_STYLE, VALUE_STYLE}
 use crate::ERROR_STYLE;
 
 // Constants
-const STARTER_CONFIG_CONTENTS: &str = include_str!("../static/starter-loadouts-config.toml");
+#[cfg(windows)]
+const STARTER_CONFIG_CONTENTS: &str =
+	include_str!("../static/starter-loadouts-config-windows.toml");
+#[cfg(not(windows))]
+const STARTER_CONFIG_CONTENTS: &str = include_str!("../static/starter-loadouts-config-unix.toml");
 
 // Type Definitions
 type LoadoutName = String;
