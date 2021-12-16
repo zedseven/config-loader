@@ -4,7 +4,7 @@
 #[cfg(not(windows))]
 use std::os::unix::fs::symlink;
 #[cfg(windows)]
-use std::os::windows::fs::symlink_file;
+use std::os::windows::fs::{symlink_dir, symlink_file};
 use std::{
 	collections::HashMap,
 	fs::{
@@ -196,7 +196,7 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 
 /// Loads a loadout, managing the symlinks as necessary.
 fn load_loadout(targets: &HashMap<FileTarget, String>, loadout: &Loadout) -> Result<()> {
-	for (target_name, file) in &loadout.files {
+	for (target_name, source) in &loadout.files {
 		// Get the target path based on the identifier provided
 		let target = targets.get(target_name).ok_or_else(|| {
 			Error::msg(format!(
@@ -204,6 +204,10 @@ fn load_loadout(targets: &HashMap<FileTarget, String>, loadout: &Loadout) -> Res
 				target_name
 			))
 		})?;
+
+		// Get the source path metadata and error if it does not exist
+		let source_metadata = symlink_metadata(source)
+			.with_context(|| format!("source path \"{}\" does not exist", source))?;
 
 		// Remove the existing target symlink unless it's an actual file
 		// We don't want to accidentally delete a user's real file
@@ -224,19 +228,28 @@ fn load_loadout(targets: &HashMap<FileTarget, String>, loadout: &Loadout) -> Res
 		// Create a new symlink for the target
 		#[cfg(windows)]
 		{
-			symlink_file(file, target).with_context(|| {
-				Error::msg(format!(
-					"unable to create a symbolic link at \"{}\" pointing to \"{}\"",
-					target, file
-				))
-			})?;
+			if source_metadata.is_dir() {
+				symlink_dir(source, target).with_context(|| {
+					Error::msg(format!(
+						"unable to create a symbolic link (directory) at \"{}\" pointing to \"{}\"",
+						target, source
+					))
+				})?;
+			} else {
+				symlink_file(source, target).with_context(|| {
+					Error::msg(format!(
+						"unable to create a symbolic link (file) at \"{}\" pointing to \"{}\"",
+						target, source
+					))
+				})?;
+			}
 		}
 		#[cfg(not(windows))]
 		{
-			symlink(file, target).with_context(|| {
+			symlink(source, target).with_context(|| {
 				Error::msg(format!(
 					"unable to create a symbolic link at \"{}\" pointing to \"{}\"",
-					target, file
+					target, source
 				))
 			})?;
 		}
