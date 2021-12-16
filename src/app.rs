@@ -6,7 +6,7 @@ use std::os::unix::fs::symlink;
 #[cfg(windows)]
 use std::os::windows::fs::{symlink_dir, symlink_file};
 use std::{
-	collections::HashMap,
+	collections::{HashMap, VecDeque},
 	fs::{
 		read_to_string as read_file_to_string,
 		remove_dir,
@@ -29,20 +29,23 @@ use super::{HEADER_STYLE, INPUT_STYLE, MESSAGE_STYLE, RESULT_STYLE, VALUE_STYLE}
 const STARTER_CONFIG_CONTENTS: &str = include_str!("../static/starter-loadouts-config.toml");
 
 // Type Definitions
+type LoadoutName = String;
 type FileTarget = String;
+type FilePath = String;
 
 /// The loadouts config.
 #[derive(Debug, Deserialize)]
 struct LoadoutsConfig {
-	targets: HashMap<FileTarget, String>,
+	targets: HashMap<FileTarget, FilePath>,
 	loadouts: Vec<Loadout>,
 }
 
 /// A loadout, defining destination files for each target.
 #[derive(Debug, Deserialize)]
 struct Loadout {
-	name: String,
-	files: HashMap<FileTarget, String>,
+	name: LoadoutName,
+	parent: Option<LoadoutName>,
+	files: HashMap<FileTarget, FilePath>,
 }
 
 /// The main loop of the application. On each loop it reads the config, provides
@@ -172,7 +175,7 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 			Ok(i) => {
 				if i < loadouts_config.loadouts.len() {
 					previous_selection = Some(loadouts_config.loadouts[i].name.clone());
-					load_loadout(&loadouts_config.targets, &loadouts_config.loadouts[i])?;
+					load_loadout(&loadouts_config, loadouts_config.loadouts[i].name.as_str())?;
 				} else {
 					println!("Unrecognized command. Please try again.");
 				}
@@ -181,20 +184,22 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 				"r" => continue,
 				"e" | "q" | "x" => break,
 				input => {
-					let mut found_loadout = None;
+					let mut found_loadout_name = None;
 					for loadout in &loadouts_config.loadouts {
 						let loadout_name_prepared = loadout.name.to_lowercase();
 						if loadout_name_prepared.starts_with(input) {
-							found_loadout = Some(loadout);
+							found_loadout_name = Some(loadout.name.as_str());
 							break;
 						}
 					}
-					if let Some(loadout) = found_loadout {
-						previous_selection = Some(loadout.name.clone());
-						load_loadout(&loadouts_config.targets, loadout)?;
+					if let Some(loadout_name) = found_loadout_name {
+						previous_selection = Some(loadout_name.to_owned());
+						load_loadout(&loadouts_config, loadout_name)?;
+						continue;
 					}
 
 					println!("Unrecognized command. Please try again.");
+					continue;
 				}
 			},
 		}
@@ -204,10 +209,37 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 }
 
 /// Loads a loadout, managing the symlinks as necessary.
-fn load_loadout(targets: &HashMap<FileTarget, String>, loadout: &Loadout) -> Result<()> {
-	for (target_name, source) in &loadout.files {
+fn load_loadout(config: &LoadoutsConfig, loadout_name: &str) -> Result<()> {
+	// Build a chain of loadouts
+	// This could be sped up, but it's not likely to ever get enough significant use
+	// to be worth the changes necessary
+	let mut loadout_chain = VecDeque::with_capacity(1);
+	let mut search_name = loadout_name;
+	'chain_builder: loop {
+		'name_search: for loadout in &config.loadouts {
+			if loadout.name.as_str() == search_name {
+				loadout_chain.push_back(loadout);
+				if let Some(parent_name) = &loadout.parent {
+					search_name = parent_name.as_str();
+					break 'name_search;
+				}
+				break 'chain_builder;
+			}
+		}
+	}
+
+	// Follow the parental chain, and load the set of file targets to replace
+	let mut file_mappings = HashMap::new();
+	while let Some(loadout) = loadout_chain.pop_back() {
+		for mapping in &loadout.files {
+			file_mappings.insert(mapping.0, mapping.1);
+		}
+	}
+
+	// Load all the file links
+	for (target_name, source) in file_mappings {
 		// Get the target path based on the identifier provided
-		let target = targets.get(target_name).ok_or_else(|| {
+		let target = config.targets.get(target_name).ok_or_else(|| {
 			Error::msg(format!(
 				"target with identifier \"{}\" could not be found",
 				target_name
@@ -280,7 +312,7 @@ fn load_loadout(targets: &HashMap<FileTarget, String>, loadout: &Loadout) -> Res
 		}
 	}
 
-	println!("{} {}", RESULT_STYLE.paint("Loaded:"), &loadout.name);
+	println!("{} {}", RESULT_STYLE.paint("Loaded:"), loadout_name);
 
 	Ok(())
 }
