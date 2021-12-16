@@ -25,14 +25,14 @@ use yansi::Paint;
 use super::{HEADER_STYLE, INPUT_STYLE, MESSAGE_STYLE, RESULT_STYLE, VALUE_STYLE};
 
 // Constants
-const STARTER_CONFIG_CONTENTS: &str = include_str!("../static/starter-config-master.toml");
+const STARTER_CONFIG_CONTENTS: &str = include_str!("../static/starter-loadouts-config.toml");
 
 // Type Definitions
 type FileTarget = String;
 
-/// The master config.
+/// The loadouts config.
 #[derive(Debug, Deserialize)]
-struct MasterConfig {
+struct LoadoutsConfig {
 	targets: HashMap<FileTarget, String>,
 	loadouts: Vec<Loadout>,
 }
@@ -46,20 +46,20 @@ struct Loadout {
 
 /// The main loop of the application. On each loop it reads the config, provides
 /// the user with options, then awaits the user's decision and acts upon it.
-pub fn loadout_loop(master_file: &Path) -> Result<()> {
+pub fn loadout_loop(config_path: &Path) -> Result<()> {
 	let mut previous_selection = None;
 	let mut input_buffer = String::new();
 	let stdin = stdin();
 	loop {
 		// Read the config contents or prompt the user to make a starter one if it
 		// doesn't exist
-		let file_contents = match read_file_to_string(master_file) {
+		let file_contents = match read_file_to_string(config_path) {
 			Ok(contents) => contents,
 			Err(error) => {
 				println!(
 					"{} {}",
 					MESSAGE_STYLE.paint(
-						"Unable to read the master config file. Would you like a starter one to \
+						"Unable to read the loadouts config file. Would you like a starter one to \
 						 be created?"
 					),
 					INPUT_STYLE.paint("(y/n)")
@@ -73,11 +73,11 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 				let user_input = input_buffer.trim_start();
 
 				if user_input.starts_with('y') {
-					write_string_to_file(master_file, STARTER_CONFIG_CONTENTS).with_context(
+					write_string_to_file(config_path, STARTER_CONFIG_CONTENTS).with_context(
 						|| {
 							format!(
 								"unable to write the starter config file \"{}\"",
-								master_file.display()
+								config_path.display()
 							)
 						},
 					)?;
@@ -86,7 +86,7 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 						MESSAGE_STYLE.paint(format!(
 							"A starter config file has been created at \"{}\". You will have to \
 							 edit it to add your loadouts before you can use this tool.",
-							VALUE_STYLE.paint(master_file.display())
+							VALUE_STYLE.paint(config_path.display())
 						))
 					);
 					continue;
@@ -94,20 +94,20 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 
 				return Err(error).with_context(|| {
 					format!(
-						"unable to read master config file \"{}\" and the user declined to make a \
-						 starter copy",
-						master_file.display()
+						"unable to read loadouts config file \"{}\" and the user declined to make \
+						 a starter copy",
+						config_path.display()
 					)
 				});
 			}
 		};
 
 		// Deserialize the config
-		let master_config = from_toml_str::<MasterConfig>(file_contents.as_str())
-			.with_context(|| "unable to deserialize the master config file")?;
+		let loadouts_config = from_toml_str::<LoadoutsConfig>(file_contents.as_str())
+			.with_context(|| "unable to deserialize the loadouts config file")?;
 
 		// Calculate the width to pad entries to so they remain lined up
-		let number_width = (master_config.loadouts.len() - 1).log10() as usize + 1;
+		let number_width = (loadouts_config.loadouts.len() - 1).log10() as usize + 1;
 
 		// Give the user their options
 		if previous_selection.is_none() {
@@ -131,7 +131,7 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 		} else {
 			println!("{}", HEADER_STYLE.paint("Loadouts:"));
 		}
-		for (index, loadout) in master_config.loadouts.iter().enumerate() {
+		for (index, loadout) in loadouts_config.loadouts.iter().enumerate() {
 			let matches_previous_selection = if let Some(previous) = &previous_selection {
 				loadout.name.eq(previous)
 			} else {
@@ -163,15 +163,15 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 
 		match user_input.parse::<usize>() {
 			Ok(i) => {
-				previous_selection = Some(master_config.loadouts[i].name.clone());
-				load_loadout(&master_config.targets, &master_config.loadouts[i])?;
+				previous_selection = Some(loadouts_config.loadouts[i].name.clone());
+				load_loadout(&loadouts_config.targets, &loadouts_config.loadouts[i])?;
 			}
 			Err(_) => match user_input {
 				"r" => continue,
 				"q" | "x" => break,
 				input => {
 					let mut found_loadout = None;
-					for loadout in &master_config.loadouts {
+					for loadout in &loadouts_config.loadouts {
 						let loadout_name_prepared = loadout.name.to_lowercase();
 						if loadout_name_prepared.starts_with(input) {
 							found_loadout = Some(loadout);
@@ -180,7 +180,7 @@ pub fn loadout_loop(master_file: &Path) -> Result<()> {
 					}
 					if let Some(loadout) = found_loadout {
 						previous_selection = Some(loadout.name.clone());
-						load_loadout(&master_config.targets, loadout)?;
+						load_loadout(&loadouts_config.targets, loadout)?;
 						continue;
 					}
 

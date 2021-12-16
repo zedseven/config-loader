@@ -4,7 +4,7 @@
 use anyhow::Error;
 use clap::{App, Arg, ArgMatches};
 
-use crate::MASTER_CONFIG_VAR;
+use crate::LOADOUTS_CONFIG_PATH_VAR;
 
 // Constants
 const PROJECT_URL: &str = "https://github.com/zedseven/config-loader";
@@ -16,17 +16,18 @@ pub fn parse_cli_arguments() -> ArgMatches {
 		.author(env!("CARGO_PKG_AUTHORS"))
 		.about(format!("{}\n\n{}", PROJECT_URL, env!("CARGO_PKG_DESCRIPTION")).as_str())
 		.arg(
-			Arg::new("master")
-				.short('m')
-				.long("master")
+			Arg::new("loadouts")
+				.short('l')
+				.long("loadouts")
+				.alias("config")
 				.takes_value(true)
 				.value_name("PATH")
 				.long_help(
 					format!(
-						"The location of the master config file to use (if not present, it uses \
+						"The location of the loadouts config file to use (if not present, it uses \
 						 the value of the environment variable \"{}\", and if that's not present \
 						 it uses the user home directory)",
-						MASTER_CONFIG_VAR
+						LOADOUTS_CONFIG_PATH_VAR
 					)
 					.as_str(),
 				),

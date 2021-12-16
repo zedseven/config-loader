@@ -41,8 +41,8 @@ use yansi::{Color, Paint, Style};
 use crate::{app::loadout_loop, cli::parse_cli_arguments};
 
 // Constants
-const DEFAULT_MASTER_FILE: &str = "config-master.toml";
-const MASTER_CONFIG_VAR: &str = "CONFIG_LOADER_CONFIG";
+const DEFAULT_CONFIG_FILE: &str = "loadouts-config.toml";
+const LOADOUTS_CONFIG_PATH_VAR: &str = "LOADOUTS_CONFIG_PATH";
 lazy_static! {
 	static ref MESSAGE_STYLE: Style = Style::new(Color::Cyan).wrap();
 	static ref HEADER_STYLE: Style = Style::new(Color::Yellow).bold();
@@ -54,12 +54,12 @@ lazy_static! {
 /// Entry Point.
 fn main() -> Result<()> {
 	let matches = parse_cli_arguments();
-	let master_file = matches
-		.value_of("master")
+	let config_file = matches
+		.value_of("loadouts")
 		.map(PathBuf::from)
-		.or_else(|| var(MASTER_CONFIG_VAR).ok().map(PathBuf::from))
-		.or_else(get_default_master_file)
-		.ok_or_else(|| Error::msg("unable to get a value for the master config file"))?;
+		.or_else(|| var(LOADOUTS_CONFIG_PATH_VAR).ok().map(PathBuf::from))
+		.or_else(get_default_config_path)
+		.ok_or_else(|| Error::msg("unable to get a value for the loadouts config file"))?;
 	let colour = matches.value_of("colour").expect("clap has betrayed us");
 
 	if colour == "never" || (colour == "auto" && !Paint::enable_windows_ascii()) {
@@ -68,14 +68,14 @@ fn main() -> Result<()> {
 
 	println!(
 		"{} \"{}\"",
-		RESULT_STYLE.paint("Using master config file:"),
-		VALUE_STYLE.paint(master_file.display())
+		RESULT_STYLE.paint("Using loadouts config file:"),
+		VALUE_STYLE.paint(config_file.display())
 	);
 
-	loadout_loop(master_file.as_path())
+	loadout_loop(config_file.as_path())
 }
 
-/// Fetches the path for the default master file.
-fn get_default_master_file() -> Option<PathBuf> {
-	home_dir().map(|dir| dir.join(DEFAULT_MASTER_FILE))
+/// Fetches the path for the default loadouts config.
+fn get_default_config_path() -> Option<PathBuf> {
+	home_dir().map(|dir| dir.join(DEFAULT_CONFIG_FILE))
 }
