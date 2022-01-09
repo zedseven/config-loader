@@ -14,213 +14,70 @@ use std::{
 		symlink_metadata,
 		write as write_string_to_file,
 	},
-	io::stdin,
 	path::Path,
 };
 
 use anyhow::{Context, Error, Result};
 use serde::Deserialize;
 use toml::from_str as from_toml_str;
-use yansi::Paint;
 
-use super::{HEADER_STYLE, INPUT_STYLE, MESSAGE_STYLE, RESULT_STYLE, VALUE_STYLE};
-use crate::ERROR_STYLE;
-
-// Constants
-#[cfg(windows)]
-const STARTER_CONFIG_CONTENTS: &str =
-	include_str!("../static/starter-loadouts-config-windows.toml");
-#[cfg(not(windows))]
-const STARTER_CONFIG_CONTENTS: &str = include_str!("../static/starter-loadouts-config-unix.toml");
+use crate::constants::STARTER_CONFIG_CONTENTS;
 
 // Type Definitions
-type LoadoutName = String;
-type FileTarget = String;
-type FilePath = String;
+pub type LoadoutName = String;
+pub type FileTarget = String;
+pub type FilePath = String;
 
 /// The loadouts config.
-#[derive(Debug, Deserialize)]
-struct LoadoutsConfig {
-	targets: HashMap<FileTarget, FilePath>,
-	loadouts: Vec<Loadout>,
+#[derive(Clone, Debug, Deserialize)]
+pub struct LoadoutsConfig {
+	pub targets: HashMap<FileTarget, FilePath>,
+	pub loadouts: Vec<Loadout>,
 }
 
 /// A loadout, defining destination files for each target.
-#[derive(Debug, Deserialize)]
-struct Loadout {
-	name: LoadoutName,
-	parent: Option<LoadoutName>,
-	files: HashMap<FileTarget, FilePath>,
+#[derive(Clone, Debug, Deserialize)]
+pub struct Loadout {
+	pub name: LoadoutName,
+	pub parent: Option<LoadoutName>,
+	pub files: HashMap<FileTarget, FilePath>,
 }
 
-/// The main loop of the application. On each loop it reads the config, provides
-/// the user with options, then awaits the user's decision and acts upon it.
-pub fn loadout_loop(config_path: &Path) -> Result<()> {
-	let mut previous_selection = None;
-	let mut input_buffer = String::new();
-	let stdin = stdin();
-	loop {
-		// Read the config contents or prompt the user to make a starter one if it
-		// doesn't exist
-		let file_contents = match read_file_to_string(config_path) {
-			Ok(contents) => contents,
-			Err(error) => {
-				println!(
-					"{} {}",
-					MESSAGE_STYLE.paint(
-						"Unable to read the loadouts config file. Would you like a starter one to \
-						 be created?"
-					),
-					INPUT_STYLE.paint("(y/n)")
-				);
-
-				input_buffer.clear();
-				stdin
-					.read_line(&mut input_buffer)
-					.with_context(|| "failed to get user input successfully")?;
-				input_buffer = input_buffer.to_lowercase();
-				let user_input = input_buffer.trim_start();
-
-				if user_input.starts_with('y') {
-					write_string_to_file(config_path, STARTER_CONFIG_CONTENTS).with_context(
-						|| {
-							format!(
-								"unable to write the starter config file \"{}\"",
-								config_path.display()
-							)
-						},
-					)?;
-					println!(
-						"{}",
-						MESSAGE_STYLE.paint(format!(
-							"A starter config file has been created at \"{}\". You will have to \
-							 edit it to add your loadouts before you can use this tool.",
-							VALUE_STYLE.paint(config_path.display())
-						))
-					);
-					continue;
-				}
-
-				return Err(error).with_context(|| {
-					format!(
-						"unable to read loadouts config file \"{}\" and the user declined to make \
-						 a starter copy",
-						config_path.display()
-					)
-				});
-			}
-		};
-
-		// Deserialize the config
-		let loadouts_config = from_toml_str::<LoadoutsConfig>(file_contents.as_str())
-			.with_context(|| "unable to deserialize the loadouts config file")?;
-
-		// Calculate the width to pad entries to so they remain lined up
-		let number_width = (loadouts_config.loadouts.len() - 1).log10() as usize + 1;
-
-		// Give the user their options
-		if previous_selection.is_none() {
-			println!("{}", HEADER_STYLE.paint("Actions:"));
-			println!(
-				"\t{} Refresh config",
-				INPUT_STYLE.paint(format!("{:>width$}.", "R", width = number_width))
-			);
-			println!(
-				"\t{} Exit",
-				INPUT_STYLE.paint(format!(
-					"{:>width$}.",
-					if number_width >= 5 {
-						"E/Q/X"
-					} else if number_width >= 3 {
-						"E/Q"
-					} else {
-						"E"
-					},
-					width = number_width
-				))
-			);
-			println!(
-				"{} (type the index number or the start of the name)",
-				HEADER_STYLE.paint("Loadouts:")
-			);
-		} else {
-			println!("{}", HEADER_STYLE.paint("Loadouts:"));
+/// Load the [`LoadoutsConfig`] from the [`Path`] `config_path`.
+pub fn load_config(config_path: &Path) -> Result<LoadoutsConfig> {
+	let file_contents = match read_file_to_string(config_path) {
+		Ok(contents) => contents,
+		Err(error) => {
+			return Err(error).with_context(|| {
+				format!(
+					"unable to read loadouts config file \"{}\"",
+					config_path.display()
+				)
+			});
 		}
-		for (index, loadout) in loadouts_config.loadouts.iter().enumerate() {
-			let matches_previous_selection = if let Some(previous) = &previous_selection {
-				loadout.name.eq(previous)
-			} else {
-				false
-			};
-			println!(
-				"\t{} {}",
-				INPUT_STYLE.paint(format!("{:>width$}.", index, width = number_width)),
-				if matches_previous_selection {
-					Paint::new(&loadout.name).bold()
-				} else {
-					Paint::new(&loadout.name)
-				}
-			);
-		}
+	};
 
-		// Get the user's choice
-		input_buffer.clear();
-		stdin
-			.read_line(&mut input_buffer)
-			.with_context(|| "failed to get user input successfully")?;
-		input_buffer = input_buffer.to_lowercase();
-		let user_input = input_buffer.trim_end_matches(is_newline).trim();
+	// Deserialize the config
+	from_toml_str::<LoadoutsConfig>(file_contents.as_str()).with_context(|| {
+		format!(
+			"unable to deserialize the loadouts config file \"{}\"",
+			config_path.display()
+		)
+	})
+}
 
-		// Process the choice
-		if user_input.is_empty() {
-			continue;
-		}
-
-		match user_input.parse::<usize>() {
-			Ok(i) => {
-				if i < loadouts_config.loadouts.len() {
-					previous_selection = Some(loadouts_config.loadouts[i].name.clone());
-					load_loadout(&loadouts_config, loadouts_config.loadouts[i].name.as_str())?;
-				} else {
-					println!(
-						"{}",
-						ERROR_STYLE.paint("Unrecognized command. Please try again.")
-					);
-				}
-			}
-			Err(_) => match user_input {
-				"r" => continue,
-				"e" | "q" | "x" => break,
-				input => {
-					let mut found_loadout_name = None;
-					for loadout in &loadouts_config.loadouts {
-						let loadout_name_prepared = loadout.name.to_lowercase();
-						if loadout_name_prepared.starts_with(input) {
-							found_loadout_name = Some(loadout.name.as_str());
-							break;
-						}
-					}
-					if let Some(loadout_name) = found_loadout_name {
-						previous_selection = Some(loadout_name.to_owned());
-						load_loadout(&loadouts_config, loadout_name)?;
-						continue;
-					}
-
-					println!(
-						"{}",
-						ERROR_STYLE.paint("Unrecognized command. Please try again.")
-					);
-					continue;
-				}
-			},
-		}
-	}
-
-	Ok(())
+/// Create a starter config at the [`Path`] `config_path`.
+pub fn create_starter_config(config_path: &Path) -> Result<()> {
+	write_string_to_file(config_path, STARTER_CONFIG_CONTENTS).with_context(|| {
+		format!(
+			"unable to write the starter config file \"{}\"",
+			config_path.display()
+		)
+	})
 }
 
 /// Loads a loadout, managing the symlinks as necessary.
-fn load_loadout(config: &LoadoutsConfig, loadout_name: &str) -> Result<()> {
+pub fn load_loadout(config: &LoadoutsConfig, loadout_name: &str) -> Result<()> {
 	// Build a chain of loadouts
 	// This could be sped up, but it's not likely to ever get enough significant use
 	// to be worth the changes necessary
@@ -263,8 +120,7 @@ fn load_loadout(config: &LoadoutsConfig, loadout_name: &str) -> Result<()> {
 
 		// Remove the existing target symlink unless it's an actual file
 		// We don't want to accidentally delete a user's real file
-		if let Ok(symlink_info) = symlink_metadata(target) {
-			let file_type = symlink_info.file_type();
+		if let Ok(file_type) = symlink_metadata(target).map(|m| m.file_type()) {
 			if file_type.is_symlink() {
 				// Windows directory symlinks must be removed as directories
 				#[cfg(windows)]
@@ -323,14 +179,5 @@ fn load_loadout(config: &LoadoutsConfig, loadout_name: &str) -> Result<()> {
 		}
 	}
 
-	println!("{} {}", RESULT_STYLE.paint("Loaded:"), loadout_name);
-
 	Ok(())
-}
-
-/// A convenience function for removing newlines and carriage returns from user
-/// input. Technically the carriage return isn't a newline character, but since
-/// it always comes with a newline character we need to remove it as well.
-fn is_newline(c: char) -> bool {
-	c == '\n' || c == '\r'
 }

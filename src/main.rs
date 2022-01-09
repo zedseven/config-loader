@@ -25,64 +25,28 @@
 	unused_macros
 )]
 #![feature(int_log)]
+// To make the program not open the console when opened standalone in GUI mode
+#![cfg_attr(all(windows, feature = "cli"), windows_subsystem = "console")]
+#![cfg_attr(all(windows, feature = "gui"), windows_subsystem = "windows")]
 
 // Modules
 mod app;
+#[cfg(feature = "cli")]
 mod cli;
+mod constants;
+#[cfg(feature = "gui")]
+mod gui;
+mod util;
 
 // Uses
-use std::{env::var, path::PathBuf};
+use anyhow::Result;
 
-use anyhow::{Error, Result};
-use home::home_dir;
-use lazy_static::lazy_static;
-use yansi::{Color, Paint, Style};
-
-use crate::{app::loadout_loop, cli::parse_cli_arguments};
-
-// Constants
-const DEFAULT_CONFIG_FILE: &str = "loadouts-config.toml";
-const LOADOUTS_CONFIG_PATH_VAR: &str = "LOADOUTS_CONFIG_PATH";
-lazy_static! {
-	static ref MESSAGE_STYLE: Style = Style::new(Color::Cyan).wrap();
-	static ref HEADER_STYLE: Style = Style::new(Color::Yellow).bold();
-	static ref RESULT_STYLE: Style = Style::new(Color::Green).bold();
-	static ref ERROR_STYLE: Style = Style::new(Color::Red).bold();
-	static ref INPUT_STYLE: Style = Style::default().italic().dimmed();
-	static ref VALUE_STYLE: Style = Style::default().underline();
-}
+#[cfg(feature = "cli")]
+use crate::cli::start;
+#[cfg(feature = "gui")]
+use crate::gui::start;
 
 /// Entry Point.
 fn main() -> Result<()> {
-	let matches = parse_cli_arguments();
-	let config_file = matches
-		.value_of("loadouts")
-		.map(PathBuf::from)
-		.or_else(|| var(LOADOUTS_CONFIG_PATH_VAR).ok().map(PathBuf::from))
-		.or_else(get_default_config_path)
-		.ok_or_else(|| Error::msg("unable to get a value for the loadouts config file"))?;
-	let colour = matches
-		.value_of("colour")
-		.expect("clap has betrayed us")
-		.to_lowercase();
-
-	if colour.as_str() == "never" || (colour.as_str() == "auto" && !Paint::enable_windows_ascii()) {
-		Paint::disable();
-	}
-
-	println!(
-		"{} \"{}\"",
-		RESULT_STYLE.paint(format!(
-			"Config Loader v{}, using loadouts config file:",
-			env!("CARGO_PKG_VERSION")
-		)),
-		VALUE_STYLE.paint(config_file.display())
-	);
-
-	loadout_loop(config_file.as_path())
-}
-
-/// Fetches the path for the default loadouts config.
-fn get_default_config_path() -> Option<PathBuf> {
-	home_dir().map(|dir| dir.join(DEFAULT_CONFIG_FILE))
+	start()
 }

@@ -1,6 +1,6 @@
 [package]
 name = "config-loader"
-version = "2.2.3"
+version = "3.0.0"
 authors = ["Zacchary Dempsey-Plante <zacc@ztdp.ca>"]
 edition = "2021"
 license = "MIT OR Apache-2.0"
@@ -17,9 +17,14 @@ lto = true
 
 [dependencies]
 anyhow = "1.0"
-clap = "3.0.0-rc.5"
+clap = { version = "3.0", optional = true }
+druid = { git = "https://github.com/linebender/druid", optional = true }
 home = "0.5"
 lazy_static = "1.4"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.5"
-yansi = "0.5"
+yansi = { version = "0.5", optional = true }
+
+[features]
+cli = ["clap", "yansi"]
+gui = ["druid"]
