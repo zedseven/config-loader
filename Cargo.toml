@@ -18,13 +18,28 @@ lto = true
 [dependencies]
 anyhow = "1.0"
 clap = { version = "3.0", optional = true }
-druid = { git = "https://github.com/linebender/druid", optional = true }
+druid = { git = "https://github.com/linebender/druid", optional = true, features = ["raw-win-handle"] }
 home = "0.5"
 lazy_static = "1.4"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.5"
 yansi = { version = "0.5", optional = true }
 
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", optional = true, features = ["windef"] }
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1"
+
+[patch."https://github.com/linebender/druid"]
+druid = { git = "https://github.com/zedseven/druid" } # Awaits https://github.com/linebender/druid/pull/2119
+
+[patch.crates-io]
+winres = { git = "https://github.com/zedseven/winres" } # Awaits https://github.com/mxre/winres/pull/39
+
 [features]
 cli = ["clap", "yansi"]
-gui = ["druid"]
+gui = ["druid", "winapi"]
+
+[package.metadata.winres]
+FileDescription = "Config Loader"

@@ -1,6 +1,8 @@
 //! Defines constants for use by the rest of the program.
 
 // Constants
+pub const PROGRAM_VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const PROGRAM_AUTHOURS: &str = env!("CARGO_PKG_AUTHORS");
 pub const PROJECT_URL: &str = "https://github.com/zedseven/config-loader";
 pub const DEFAULT_CONFIG_FILE: &str = "loadouts-config.toml";
 pub const LOADOUTS_CONFIG_PATH_VAR: &str = "LOADOUTS_CONFIG_PATH";

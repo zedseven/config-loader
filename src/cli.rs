@@ -14,7 +14,7 @@ use yansi::{Color, Paint, Style};
 
 use crate::{
 	app::{create_starter_config, load_config, load_loadout},
-	constants::{LOADOUTS_CONFIG_PATH_VAR, PROJECT_URL},
+	constants::{LOADOUTS_CONFIG_PATH_VAR, PROGRAM_AUTHOURS, PROGRAM_VERSION, PROJECT_URL},
 	util::{get_default_config_path, is_newline},
 };
 
@@ -221,8 +221,8 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 /// Defines the CLI arguments and parses user input.
 pub fn parse_cli_arguments() -> ArgMatches {
 	App::new("Config Loader")
-		.version(env!("CARGO_PKG_VERSION"))
-		.author(env!("CARGO_PKG_AUTHORS"))
+		.version(PROGRAM_VERSION)
+		.author(PROGRAM_AUTHOURS)
 		.about(format!("{}\n\n{}", PROJECT_URL, env!("CARGO_PKG_DESCRIPTION")).as_str())
 		.arg(
 			Arg::new("loadouts")
