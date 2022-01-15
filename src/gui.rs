@@ -7,7 +7,7 @@ use std::{
 	fmt,
 	fmt::{Debug, Formatter},
 	path::PathBuf,
-	ptr,
+	ptr::null,
 };
 
 use anyhow::{Context, Error, Result};
@@ -57,7 +57,7 @@ use winapi::{
 };
 
 #[cfg(windows)]
-use crate::util::get_last_winapi_error;
+use crate::util::assert_winapi_success;
 use crate::{
 	app::{load_config, LoadoutsConfig},
 	constants::{LOADOUTS_CONFIG_PATH_VAR, PROGRAM_AUTHOURS, PROGRAM_VERSION, PROJECT_URL},
@@ -287,7 +287,7 @@ fn set_window_icon(handle: &WindowHandle) {
 				lazy_static! {
 					static ref PROGRAM_ICON: isize = unsafe {
 						// Passing NULL means the executable file is selected
-						let h_instance = GetModuleHandleW(ptr::null());
+						let h_instance = GetModuleHandleW(null());
 
 						// Don't need MAKEINTRESOURCEW() here because IDI_APPLICATION is already
 						// converted
@@ -302,24 +302,24 @@ fn set_window_icon(handle: &WindowHandle) {
 						.cast::<HICON>() as isize
 					};
 				}
-				dbg!(get_last_winapi_error());
+				assert_winapi_success();
 
 				// Shown at the top of the window
-				dbg!(SendMessageW(
+				SendMessageW(
 					win_handle.hwnd.cast::<HWND__>(),
 					WM_SETICON,
 					ICON_SMALL as usize,
 					*PROGRAM_ICON,
-				));
-				dbg!(get_last_winapi_error());
+				);
+				assert_winapi_success();
 				// Shown in the Alt+Tab dialog
-				dbg!(SendMessageW(
+				SendMessageW(
 					win_handle.hwnd.cast::<HWND__>(),
 					WM_SETICON,
 					ICON_BIG as usize,
 					*PROGRAM_ICON,
-				));
-				dbg!(get_last_winapi_error());
+				);
+				assert_winapi_success();
 			}
 		},
 		_ => {}

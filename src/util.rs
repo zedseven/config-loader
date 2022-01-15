@@ -5,7 +5,7 @@ use std::path::PathBuf;
 
 use home::home_dir;
 #[cfg(all(windows, feature = "gui"))]
-use winapi::um::errhandlingapi::GetLastError;
+use winapi::{shared::winerror::ERROR_SUCCESS, um::errhandlingapi::GetLastError};
 
 use crate::constants::DEFAULT_CONFIG_FILE;
 
@@ -22,13 +22,21 @@ pub fn is_newline(c: char) -> bool {
 }
 
 #[cfg(all(windows, feature = "gui"))]
-/// Retrieves the error code that was last set for the thread.
+/// Asserts that the last WinAPI call returned [`ERROR_SUCCESS`]. (debug-only)
 ///
 /// This function is thread-local.
 ///
 /// See
-/// https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/18d8fbe8-a967-4f1c-ae50-99ca8e491d2d
+/// [here](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/18d8fbe8-a967-4f1c-ae50-99ca8e491d2d)
 /// for the error code reference.
-pub fn get_last_winapi_error() -> u32 {
-	unsafe { GetLastError() }
+pub fn assert_winapi_success() {
+	#[cfg(debug_assertions)]
+	{
+		let last_error = unsafe { GetLastError() };
+		assert_eq!(
+			ERROR_SUCCESS, last_error,
+			"the last WinAPI call failed with error code: {:#010X}",
+			last_error
+		);
+	}
 }
