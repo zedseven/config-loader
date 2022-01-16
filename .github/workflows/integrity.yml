@@ -12,10 +12,10 @@ jobs:
     name: Rustfmt Check
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v2
 
-      - name: install nightly toolchain
+      - name: Install `nightly` toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
@@ -23,7 +23,7 @@ jobs:
           components: rustfmt
           override: true
 
-      - name: cargo fmt
+      - name: Rustfmt
         uses: actions-rs/cargo@v1
         with:
           command: fmt
@@ -43,16 +43,16 @@ jobs:
           - ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v2
 
-      - name: install libgtk-3-dev
+      - name: Install `libgtk-3-dev`
         run: |
           sudo apt update
           sudo apt install libgtk-3-dev
         if: matrix.configuration == 'gui' && contains(matrix.os, 'ubuntu')
 
-      - name: install nightly toolchain
+      - name: Install `nightly` toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
@@ -60,7 +60,7 @@ jobs:
           components: clippy
           override: true
 
-      - name: restore cache
+      - name: Restore cache
         uses: actions/cache@v2
         with:
           path: |
@@ -71,7 +71,7 @@ jobs:
             target/
           key: ${{ matrix.configuration }}-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: cargo clippy
+      - name: Cargo Clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
