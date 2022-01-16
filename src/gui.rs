@@ -119,6 +119,17 @@ impl AppDelegate<ProgramState> for ProgramDelegate {
 					.resizable(false),
 			);
 			Handled::Yes
+		} else if cmd.is(SHOW_PREFERENCES) {
+			ctx.new_window(
+				WindowDesc::new(ui_preferences())
+					.title(LocalizedString::new("preferences"))
+					.window_size_policy(WindowSizePolicy::Content)
+					.set_level(WindowLevel::Modal(self.main_window_handle()))
+					.set_position((0.0, 0.0))
+					.show_titlebar(true)
+					.resizable(false),
+			);
+			Handled::Yes
 		} else {
 			Handled::No
 		}
@@ -138,8 +149,7 @@ impl AppDelegate<ProgramState> for ProgramDelegate {
 		// Do program startup stuff and store the main window ID
 		if self.main_window_id.is_none() {
 			self.main_window_id = Some(window_id);
-			// TODO: Handle this properly
-			initialize_once_loaded(data).expect("Zacc forgot to handle this properly");
+			initialize_once_loaded(data).expect("something went wrong when doing initialization");
 		}
 
 		// Set the window icon
@@ -246,6 +256,11 @@ fn ui_about() -> impl Widget<ProgramState> {
 	)
 }
 
+fn ui_preferences() -> impl Widget<ProgramState> {
+	// Container for the whole UI
+	Padding::new(10.0, Flex::column())
+}
+
 /// Create the main menu bar.
 fn make_menu(_: Option<WindowId>, _: &ProgramState, _: &Env) -> Menu<ProgramState> {
 	let mut menu_main = Menu::new(LocalizedString::new("program-name"));
@@ -256,9 +271,7 @@ fn make_menu(_: Option<WindowId>, _: &ProgramState, _: &Env) -> Menu<ProgramStat
 		.separator()
 		.entry(MenuItem::new(LocalizedString::new("menu-file-about")).command(SHOW_ABOUT))
 		.entry(
-			MenuItem::new(LocalizedString::new("menu-file-preferences"))
-				// TODO: Add this
-				.command(SHOW_PREFERENCES),
+			MenuItem::new(LocalizedString::new("menu-file-preferences")).command(SHOW_PREFERENCES),
 		)
 		.entry(
 			MenuItem::new(LocalizedString::new("menu-file-exit"))

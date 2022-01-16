@@ -1,6 +1,7 @@
 # Titles
 program-name = Config Loader
 about = About
+preferences = Preferences
 
 # Menu
 menu-file = File
