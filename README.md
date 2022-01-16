@@ -1,5 +1,6 @@
 # config-loader
 [![License: MIT/Apache-2.0](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE-MIT)
+[![Integrity Check](https://img.shields.io/github/workflow/status/zedseven/config-loader/Integrity.svg?logo=githubactions&logoColor=white&label=integrity+check)](https://github.com/zedseven/config-loader/actions/workflows/integrity.yml)
 [![# Issues](https://img.shields.io/github/issues/zedseven/config-loader.svg?logo=github)](https://github.com/zedseven/config-loader/issues)
 [![Crates.io](https://img.shields.io/crates/v/config-loader.svg?logo=rust)](https://crates.io/crates/config-loader)
 [![Crate Downloads](https://img.shields.io/crates/d/config-loader.svg?logo=azure-artifacts)](https://crates.io/crates/config-loader)
