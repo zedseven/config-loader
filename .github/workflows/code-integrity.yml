@@ -59,7 +59,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features="cli" -- -A unused_imports
+          args: --features cli -- -A unused_imports
 
   cli-clippy-macos:
     name: Clippy (CLI, macOS)
@@ -91,7 +91,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features="cli" -- -A unused_imports
+          args: --features cli -- -A unused_imports
 
   cli-clippy-linux:
     name: Clippy (CLI, Linux)
@@ -123,7 +123,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features="cli" -- -A unused_imports
+          args: --features cli -- -A unused_imports
 
   gui-clippy-windows:
     name: Clippy (GUI, Windows)
@@ -155,7 +155,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features="gui" -- -A unused_imports
+          args: --features gui -- -A unused_imports
 
   gui-clippy-macos:
     name: Clippy (GUI, macOS)
@@ -187,7 +187,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features="gui" -- -A unused_imports
+          args: --features gui -- -A unused_imports
 
   gui-clippy-linux:
     name: Clippy (GUI, Linux)
@@ -219,4 +219,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features="gui" -- -A unused_imports
+          args: --features gui -- -A unused_imports
