@@ -6,7 +6,7 @@ use std::os::unix::fs::symlink;
 #[cfg(windows)]
 use std::os::windows::fs::{symlink_dir, symlink_file};
 use std::{
-	collections::{HashMap, VecDeque},
+	collections::VecDeque,
 	fs::{
 		read_to_string as read_file_to_string,
 		remove_dir,
@@ -18,6 +18,9 @@ use std::{
 };
 
 use anyhow::{Context, Error, Result};
+#[cfg(feature = "gui")]
+use druid::{Data, Lens};
+use im::{HashMap, Vector};
 use serde::Deserialize;
 use toml::from_str as from_toml_str;
 
@@ -29,18 +32,35 @@ pub type FileTarget = String;
 pub type FilePath = String;
 
 /// The loadouts config.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+#[cfg_attr(feature = "gui", derive(Lens))]
 pub struct LoadoutsConfig {
 	pub targets: HashMap<FileTarget, FilePath>,
-	pub loadouts: Vec<Loadout>,
+	pub loadouts: Vector<Loadout>,
+}
+
+#[cfg(feature = "gui")]
+impl Data for LoadoutsConfig {
+	fn same(&self, other: &Self) -> bool {
+		self.eq(other)
+	}
 }
 
 /// A loadout, defining destination files for each target.
-#[derive(Clone, Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
 pub struct Loadout {
 	pub name: LoadoutName,
 	pub parent: Option<LoadoutName>,
+	#[serde(default)]
+	pub hidden: bool,
 	pub files: HashMap<FileTarget, FilePath>,
+}
+
+#[cfg(feature = "gui")]
+impl Data for Loadout {
+	fn same(&self, other: &Self) -> bool {
+		self.eq(other)
+	}
 }
 
 /// Load the [`LoadoutsConfig`] from the [`Path`] `config_path`.

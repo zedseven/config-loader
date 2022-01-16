@@ -73,7 +73,7 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 					"{} {}",
 					MESSAGE_STYLE.paint(
 						"Unable to read the loadouts config file. Would you like a starter one to \
-						 be created?"
+						 be created? (overwriting anything that exists there)"
 					),
 					INPUT_STYLE.paint("(y/n)")
 				);
@@ -139,7 +139,11 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 		} else {
 			println!("{}", HEADER_STYLE.paint("Loadouts:"));
 		}
-		for (index, loadout) in loadouts_config.loadouts.iter().enumerate() {
+		let mut displayed_count = 0;
+		for loadout in &loadouts_config.loadouts {
+			if loadout.hidden {
+				continue;
+			}
 			let matches_previous_selection = if let Some(previous) = &previous_selection {
 				loadout.name.eq(previous)
 			} else {
@@ -147,13 +151,18 @@ pub fn loadout_loop(config_path: &Path) -> Result<()> {
 			};
 			println!(
 				"\t{} {}",
-				INPUT_STYLE.paint(format!("{:>width$}.", index, width = number_width)),
+				INPUT_STYLE.paint(format!(
+					"{:>width$}.",
+					displayed_count,
+					width = number_width
+				)),
 				if matches_previous_selection {
 					Paint::new(&loadout.name).bold()
 				} else {
 					Paint::new(&loadout.name)
 				}
 			);
+			displayed_count += 1;
 		}
 
 		// Get the user's choice

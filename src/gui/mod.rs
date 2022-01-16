@@ -23,6 +23,7 @@ use druid::{
 	DelegateCtx,
 	Env,
 	Handled,
+	Lens,
 	Target,
 	WindowHandle,
 	WindowId,
@@ -39,17 +40,9 @@ use crate::{
 };
 
 // Types
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Data, Debug, Default, Lens)]
 struct ProgramState {
 	loadouts_config: Option<LoadoutsConfig>,
-}
-
-impl Data for ProgramState {
-	fn same(&self, _: &Self) -> bool {
-		// We should only ever have one instance anyways, so it isn't worth implementing
-		// the equality operators
-		true
-	}
 }
 
 // Startup
@@ -144,6 +137,7 @@ impl AppDelegate<ProgramState> for ProgramDelegate {
 		// Do program startup stuff and store the main window ID
 		if self.main_window_id.is_none() {
 			self.main_window_id = Some(window_id);
+			// TODO: Handle this better (pass it up the chain somehow?)
 			initialize_once_loaded(data).expect("something went wrong when doing initialization");
 		}
 

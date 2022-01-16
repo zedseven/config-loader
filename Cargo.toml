@@ -18,8 +18,9 @@ lto = true
 [dependencies]
 anyhow = "1.0"
 clap = { version = "3.0", optional = true }
-druid = { git = "https://github.com/linebender/druid", optional = true, features = ["raw-win-handle"] }
+druid = { git = "https://github.com/linebender/druid", optional = true, features = ["im", "raw-win-handle"] }
 home = "0.5"
+im = { version = "15.0", features = ["serde"] }
 lazy_static = "1.4"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.5"
