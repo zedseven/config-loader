@@ -1,10 +1,10 @@
 name: Build
 
-# Run on creation of a release draft, so the artifacts can be created and later attached for release
+# Run on creation of a pre-release, so the artifacts can be created and later attached for proper release
 on:
   release:
     types:
-      - unpublished
+      - prereleased
 
 env:
   CARGO_TERM_COLOR: always
