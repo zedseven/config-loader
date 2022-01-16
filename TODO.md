@@ -1,0 +1,19 @@
+# To-Do
+- Bundle localization resources
+  - Likely requires a PR for Druid, though I likely could do it manually as well
+  - https://github.com/linebender/druid/issues/1815
+- Program icons
+  - File icons
+    - ~~Windows~~
+      - Using `winres`
+    - macOS
+      - https://github.com/akeru-inc/xcnotary
+    - Linux
+      - May not be possible - Linux program icons seem to be done separate from the executable
+  - Window icons
+    - ~~Windows~~
+      - https://github.com/linebender/druid/pull/2119
+      - https://github.com/linebender/druid/issues/1162#issuecomment-1009864303
+    - macOS
+    - Linux
+  - https://github.com/burtonageo/cargo-bundle
