@@ -20,5 +20,5 @@
 - Set the Windows Registry key for creating symlinks automatically on Windows
 - Actually hide the hidden loadouts instead of just disabling them (greying them out)
 - Material(ish) theme with no rounded corners or gradients
-- Create `CHANGELOG.md`
+- ~~Create CHANGELOG.md~~
   - Go back through commit history and record the changes along the way
