@@ -16,6 +16,7 @@ use winres::WindowsResource;
 
 // Constants
 const BUILD_ASSETS_DIR: &str = "static";
+#[cfg(windows)]
 const NEUTRAL_LCID: u16 = 0x0000;
 
 /// Build script that prepares the application.

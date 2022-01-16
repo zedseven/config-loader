@@ -1,4 +1,4 @@
-name: Code Integrity
+name: Integrity
 
 on:
   push:
@@ -53,13 +53,13 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: cli-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features cli -- -A unused_imports
+          args: --features cli -- -D warnings -A unused
 
   cli-clippy-macos:
     name: Clippy (CLI, macOS)
@@ -85,13 +85,13 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: cli-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features cli -- -A unused_imports
+          args: --features cli -- -D warnings -A unused
 
   cli-clippy-linux:
     name: Clippy (CLI, Linux)
@@ -117,13 +117,13 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: cli-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features cli -- -A unused_imports
+          args: --features cli -- -D warnings -A unused
 
   gui-clippy-windows:
     name: Clippy (GUI, Windows)
@@ -149,13 +149,13 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: gui-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features gui -- -A unused_imports
+          args: --features gui -- -D warnings -A unused
 
   gui-clippy-macos:
     name: Clippy (GUI, macOS)
@@ -181,13 +181,13 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: gui-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features gui -- -A unused_imports
+          args: --features gui -- -D warnings -A unused
 
   gui-clippy-linux:
     name: Clippy (GUI, Linux)
@@ -213,10 +213,10 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: gui-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --features gui -- -A unused_imports
+          args: --features gui -- -D warnings -A unused
