@@ -1,36 +1,17 @@
-name: Integrity
+name: Build
 
+# Run on creation of a release draft, so the artifacts can be created and later attached for release
 on:
-  push:
-  pull_request:
+  release:
+    types:
+      - unpublished
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rustfmt-check:
-    name: Rustfmt Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-
-      - name: install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          components: rustfmt
-          override: true
-
-      - name: cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
-
-  clippy:
-    name: Clippy
+  build:
+    name: Build
     strategy:
       fail-fast: false
       matrix:
@@ -52,14 +33,6 @@ jobs:
           sudo apt install libgtk-3-dev
         if: matrix.configuration == 'gui' && contains(matrix.os, 'ubuntu')
 
-      - name: install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          components: clippy
-          override: true
-
       - name: restore cache
         uses: actions/cache@v2
         with:
@@ -71,8 +44,14 @@ jobs:
             target/
           key: ${{ matrix.configuration }}-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: cargo clippy
+      - name: cargo build
         uses: actions-rs/cargo@v1
         with:
-          command: clippy
-          args: --features ${{ matrix.configuration }} -- -D warnings -A unused
+          command: build
+          args: --release --features ${{ matrix.configuration }}
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: config-loader-${{ matrix.configuration }}-${{ github.event.release.tag_name }} (${{ runner.os }})
+          path: target/release/config-loader*
