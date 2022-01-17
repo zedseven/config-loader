@@ -62,8 +62,6 @@ pub fn start() -> Result<()> {
 
 /// Run initialization code that requires the main window to be loaded.
 fn initialize_once_loaded(data: &mut ProgramState) -> Result<()> {
-	dbg!(&data);
-
 	// Get the loadout config path
 	let config_file = var(LOADOUTS_CONFIG_PATH_VAR)
 		.ok()
@@ -74,8 +72,6 @@ fn initialize_once_loaded(data: &mut ProgramState) -> Result<()> {
 	// Load the config
 	data.loadouts_config =
 		Some(load_config(&config_file).with_context(|| "unable to load the loadouts config")?);
-
-	dbg!(&data);
 
 	Ok(())
 }
